@@ -138,6 +138,31 @@ export function sendWithPromise(methodName, var_args) {
   return promiseResolver.promise;
 }
 
+/**
+ * A map of maps associating event names with listeners. The 2nd level map
+ * associates a listener ID with the callback function, such that individual
+ * listeners can be removed from an event without affecting other listeners of
+ * the same event.
+ * @type {!Object<!Object<!Function>>}
+ */
+const webUIListenerMap = {};
+
+/**
+ * The named method the WebUI handler calls directly when an event occurs.
+ * The WebUI handler must supply the name of the event as the first argument
+ * of the JS invocation; additionally, the handler may supply any number of
+ * other arguments that will be forwarded to the listener callbacks.
+ * @param {string} event The name of the event that has occurred.
+ * @param {...*} var_args Additional arguments passed from C++.
+ */
+export function webUIListenerCallback(event, var_args) {
+  const eventListenersMap = webUIListenerMap[event];
+  if (!eventListenersMap) {
+    // C++ event sent for an event that has no listeners.
+    // TODO(dpapad): Should a warning be displayed here?
+    return;
+  }
+
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
