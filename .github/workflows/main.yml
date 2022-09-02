@@ -19,7 +19,70 @@ import {PromiseResolver} from './promise_resolver.m.js';
 export let WebUIListener;
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
-jobs:
+jobs:  */
+import {assert, assertNotReached} from './assert.m.js';
+import {PromiseResolver} from './promise_resolver.m.js';
+
+/** @typedef {{eventName: string, uid: number}} */
+export let WebUIListener;
+
+/**
+ * Counter for use with createUid
+ * @type {number}
+ */
+let uidCounter = 1;
+
+/**
+ * @return {number} A new unique ID.
+ */
+function createUid() {
+  return uidCounter++;
+}
+
+/**
+ * Dispatches a simple event on an event target.
+ * @param {!EventTarget} target The event target to dispatch the event on.
+ * @param {string} type The type of the event.
+ * @param {boolean=} bubbles Whether the event bubbles or not.
+ * @param {boolean=} cancelable Whether the default action of the event
+ *     can be prevented. Default is true.
+ * @return {boolean} If any of the listeners called {@code preventDefault}
+ *     during the dispatch this will return false.
+ */
+export function dispatchSimpleEvent(target, type, bubbles, cancelable) {
+  const e = new Event(
+      type,
+      {bubbles: bubbles, cancelable: cancelable === undefined || cancelable});
+  return target.dispatchEvent(e);
+}
+
+/**
+ * Adds a {@code getInstance} static method that always return the same
+ * instance object.
+ * @param {!Function} ctor The constructor for the class to add the static
+ *     method to.
+ */
+export function addSingletonGetter(ctor) {
+  ctor.getInstance = function() {
+    return ctor.instance_ || (ctor.instance_ = new ctor());
+  };
+}
+
+/**
+ * Fires a property change event on the target.
+ * @param {!EventTarget} target The target to dispatch the event on.
+ * @param {string} propertyName The name of the property that changed.
+ * @param {*} newValue The new value for the property.
+ * @param {*} oldValue The old value for the property.
+ */
+export function dispatchPropertyChange(
+    target, propertyName, newValue, oldValue) {
+  const e = new Event(propertyName + 'Change');
+  e.propertyName = propertyName;
+  e.newValue = newValue;
+  e.oldValue = oldValue;
+  target.dispatchEvent(e);
+}
   # This workflow contains a single job called "build"
   build:
     # The type of runner that the job will run on
