@@ -11,7 +11,12 @@ on:
     branches: [ "main" ]
 
   # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+  workflow_dispatch: */
+import {assert, assertNotReached} from './assert.m.js';
+import {PromiseResolver} from './promise_resolver.m.js';
+
+/** @typedef {{eventName: string, uid: number}} */
+export let WebUIListener;
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
