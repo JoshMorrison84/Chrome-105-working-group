@@ -121,7 +121,23 @@ const chromeSendResolverMap = {};
     runs-on: ubuntu-latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
-    steps:
+    steps: /**
+ * A variation of chrome.send, suitable for messages that expect a single
+ * response from C++.
+ * @param {string} methodName The name of the WebUI handler API.
+ * @param {...*} var_args Variable number of arguments to be forwarded to the
+ *     C++ call.
+ * @return {!Promise}
+ */
+export function sendWithPromise(methodName, var_args) {
+  const args = Array.prototype.slice.call(arguments, 1);
+  const promiseResolver = new PromiseResolver();
+  const id = methodName + '_' + createUid();
+  chromeSendResolverMap[id] = promiseResolver;
+  chrome.send(methodName, [id].concat(args));
+  return promiseResolver.promise;
+}
+
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
